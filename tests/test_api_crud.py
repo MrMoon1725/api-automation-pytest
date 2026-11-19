@@ -16,7 +16,7 @@ def _sample_booking() -> dict:
 
 
 def test_health_endpoint_contract_and_sla(base_url: str) -> None:
-    resp = requests.get(f"${base_url}/health", timeout=5)
+    resp = requests.get(f"{base_url}/health", timeout=5)
     assert resp.status_code == 200
     assert resp.elapsed.total_seconds() * 1000 < SLA_MS
     parsed = HealthResponse(**resp.json())
@@ -25,7 +25,7 @@ def test_health_endpoint_contract_and_sla(base_url: str) -> None:
 
 def test_auth_valid_credentials_returns_token(base_url: str) -> None:
     resp = requests.post(
-        f"${base_url}/auth",
+        f"{base_url}/auth",
         json={"username": "admin", "password": "password123"},
         timeout=5,
     )
@@ -36,7 +36,7 @@ def test_auth_valid_credentials_returns_token(base_url: str) -> None:
 
 def test_auth_invalid_credentials_returns_401(base_url: str) -> None:
     resp = requests.post(
-        f"${base_url}/auth",
+        f"{base_url}/auth",
         json={"username": "admin", "password": "wrong-password"},
         timeout=5,
     )
@@ -45,7 +45,7 @@ def test_auth_invalid_credentials_returns_401(base_url: str) -> None:
 
 
 def test_create_booking_without_auth_returns_401(base_url: str) -> None:
-    resp = requests.post(f"${base_url}/bookings", json=_sample_booking(), timeout=5)
+    resp = requests.post(f"{base_url}/bookings", json=_sample_booking(), timeout=5)
     assert resp.status_code == 401
 
 
@@ -53,7 +53,7 @@ def test_create_booking_invalid_payload_returns_400(base_url: str, auth_headers:
     bad_payload = _sample_booking()
     bad_payload["totalprice"] = -10
     resp = requests.post(
-        f"${base_url}/bookings",
+        f"{base_url}/bookings",
         json=bad_payload,
         headers=auth_headers,
         timeout=5,
@@ -63,7 +63,7 @@ def test_create_booking_invalid_payload_returns_400(base_url: str, auth_headers:
 
 def test_full_crud_lifecycle_and_pydantic_contracts(base_url: str, auth_headers: dict) -> None:
     create_resp = requests.post(
-        f"${base_url}/bookings",
+        f"{base_url}/bookings",
         json=_sample_booking(),
         headers=auth_headers,
         timeout=5,
@@ -73,7 +73,7 @@ def test_full_crud_lifecycle_and_pydantic_contracts(base_url: str, auth_headers:
     created = BookingRecord(**create_resp.json())
     booking_id = created.bookingid
 
-    get_resp = requests.get(f"${base_url}/bookings/${booking_id}", timeout=5)
+    get_resp = requests.get(f"{base_url}/bookings/{booking_id}", timeout=5)
     assert get_resp.status_code == 200
     fetched = BookingPayload(**get_resp.json())
     assert fetched.firstname == "Mateo"
@@ -82,7 +82,7 @@ def test_full_crud_lifecycle_and_pydantic_contracts(base_url: str, auth_headers:
     updated_payload["totalprice"] = 320
     updated_payload["additionalneeds"] = "Late Checkout"
     put_resp = requests.put(
-        f"${base_url}/bookings/${booking_id}",
+        f"{base_url}/bookings/{booking_id}",
         json=updated_payload,
         headers=auth_headers,
         timeout=5,
@@ -93,16 +93,16 @@ def test_full_crud_lifecycle_and_pydantic_contracts(base_url: str, auth_headers:
     assert updated.additionalneeds == "Late Checkout"
 
     del_resp = requests.delete(
-        f"${base_url}/bookings/${booking_id}",
+        f"{base_url}/bookings/{booking_id}",
         headers=auth_headers,
         timeout=5,
     )
     assert del_resp.status_code == 204
 
-    verify_resp = requests.get(f"${base_url}/bookings/${booking_id}", timeout=5)
+    verify_resp = requests.get(f"{base_url}/bookings/{booking_id}", timeout=5)
     assert verify_resp.status_code == 404
 
 
 def test_get_nonexistent_booking_returns_404(base_url: str) -> None:
-    resp = requests.get(f"${base_url}/bookings/999999", timeout=5)
+    resp = requests.get(f"{base_url}/bookings/999999", timeout=5)
     assert resp.status_code == 404

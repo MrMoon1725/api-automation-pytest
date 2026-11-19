@@ -25,7 +25,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run API Test Suite
-        run: pytest -v --html=reports/api-report.html --self-contained-html
+        run: python -m pytest -v --html=reports/api-report.html --self-contained-html
 
       - name: Upload API HTML Report
         if: always()

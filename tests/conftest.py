@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from typing import Iterator
+
 import pytest
 import requests
 
@@ -27,10 +28,10 @@ def base_url() -> Iterator[str]:
 @pytest.fixture(scope="session")
 def auth_headers(base_url: str) -> dict:
     resp = requests.post(
-        f"${base_url}/auth",
+        f"{base_url}/auth",
         json={"username": "admin", "password": "password123"},
         timeout=5,
     )
     assert resp.status_code == 200
     token = resp.json()["token"]
-    return {"Authorization": f"Bearer ${token}"}
+    return {"Authorization": f"Bearer {token}"}
